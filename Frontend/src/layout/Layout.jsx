@@ -26,13 +26,7 @@ const Layout = () => {
           }}
         >
           <Sidebar />
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              width: 0,
-            }}
-          >
+          <Box component="main" width="100%" pl="4rem">
             <Outlet />
           </Box>
         </Box>

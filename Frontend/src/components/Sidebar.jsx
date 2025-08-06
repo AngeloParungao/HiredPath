@@ -37,18 +37,26 @@ const Sidebar = () => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       sx={{
-        width: hovered ? 200 : 60,
+        position: "fixed",
+        zIndex: 10,
+        width: hovered ? 220 : 85,
         transition: "width 0.3s",
         overflowX: "hidden",
         height: "100vh",
-        backgroundColor: "background.paper",
-        boxShadow: 2,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
+        padding: 1.5,
       }}
     >
-      <Box>
+      <Box
+        sx={(theme) => ({
+          display: "flex",
+          flexDirection: "column",
+          backgroundColor: theme.palette.gray[800],
+          borderRadius: 1,
+          height: "100%",
+          boxShadow: 2,
+          padding: 0.2,
+        })}
+      >
         <Box
           sx={{
             p: 2,
@@ -72,8 +80,23 @@ const Sidebar = () => {
             <ListItem key={item.label} disablePadding>
               <Tooltip title={!hovered ? item.label : ""} placement="right">
                 <ListItemButton component={Link} to={item.to}>
-                  <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-                  {hovered && <ListItemText primary={item.label} />}
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 40,
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+
+                  <ListItemText
+                    primary={item.label}
+                    sx={{
+                      opacity: hovered ? 1 : 0,
+                      transition: "opacity 0.2s",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                    }}
+                  />
                 </ListItemButton>
               </Tooltip>
             </ListItem>
@@ -88,7 +111,16 @@ const Sidebar = () => {
               <Tooltip title={!hovered ? item.label : ""} placement="right">
                 <ListItemButton component={Link} to={item.to}>
                   <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-                  {hovered && <ListItemText primary={item.label} />}
+
+                  <ListItemText
+                    primary={item.label}
+                    sx={{
+                      opacity: hovered ? 1 : 0,
+                      transition: "opacity 0.2s",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                    }}
+                  />
                 </ListItemButton>
               </Tooltip>
             </ListItem>
