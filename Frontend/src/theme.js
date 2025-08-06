@@ -8,7 +8,7 @@ export const getTheme = (mode) => {
       mode,
 
       primary: {
-        light: "#BFC5DB",
+        light: "#949ec2ff",
         main: "#262840",
         dark: "#002366",
         contrastText: "#ffffff",
@@ -18,11 +18,11 @@ export const getTheme = (mode) => {
         light: "#FFB6A6",
         main: "#FF6F61",
         dark: "#C13B30",
-        contrastText: "#fff",
+        contrastText: "#ffffff",
       },
 
       neutral: {
-        light: "#f5f5f5",
+        light: "#e5e5e5ff",
         main: "#cccccc",
         dark: "#9e9e9e",
         contrastText: isDark ? "#000" : "#fff",

@@ -42,4 +42,55 @@ const fetchApplications = async (req, res) => {
   }
 };
 
-module.exports = { createApplication, fetchApplications };
+const updateApplication = async (req, res) => {
+  const { id } = req.params;
+  const { status, interview_date } = req.body;
+
+  let query = "";
+  const values = [id];
+
+  if (status) {
+    query = "UPDATE applications SET status = $1 WHERE id = $2";
+    values.unshift(status);
+  }
+
+  if (interview_date) {
+    query = "UPDATE applications SET interview_date = $1 WHERE id = $2";
+    values.unshift(interview_date);
+  }
+
+  try {
+    await db.query(query, values);
+    res.status(200).json({
+      message: "Application updated successfully",
+      application: {
+        id,
+        ...(status && { status }),
+        ...(interview_date && { interview_date }),
+      },
+    });
+  } catch (error) {
+    console.error("Error updating application:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const deleteApplications = async (req, res) => {
+  const ids = req.body.ids;
+  try {
+    const query = "DELETE from applications WHERE id = ANY($1)";
+
+    await db.query(query, [ids]);
+    res.status(200).json({ message: "Applications deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting applications:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+module.exports = {
+  createApplication,
+  fetchApplications,
+  updateApplication,
+  deleteApplications,
+};
