@@ -6,10 +6,17 @@ import { Box, CssBaseline, ThemeProvider } from "@mui/material";
 import Sidebar from "../components/Sidebar";
 import InternetChecker from "../components/InternetChecker";
 import useGlobalStore from "../store/globalStore";
+import { useEffect } from "react";
+import useApplicationStore from "../store/applicationStore";
 
 const Layout = () => {
   const { theme } = useGlobalStore();
+  const { fetchApplications } = useApplicationStore();
   const mode = getTheme(theme);
+
+  useEffect(() => {
+    fetchApplications(1);
+  }, []);
 
   return (
     <ThemeProvider theme={mode}>

@@ -26,22 +26,13 @@ import dayjs from "dayjs";
 import TopBar from "../components/TopBar";
 
 const Application = () => {
-  const {
-    applications,
-    loading,
-    fetchApplications,
-    updateApplication,
-    deleteApplications,
-  } = useApplicationStore();
+  const { applications, loading, updateApplication, deleteApplications } =
+    useApplicationStore();
   const { online } = useGlobalStore();
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-
-  useEffect(() => {
-    fetchApplications(1);
-  }, []);
 
   const columns = [
     {
@@ -222,7 +213,7 @@ const Application = () => {
       </Box>
       {!online || loading ? (
         <Box
-          height="calc(100vh - 160px)"
+          height="calc(100vh - 150px)"
           display="flex"
           flexDirection="column"
           alignItems="center"
@@ -239,7 +230,7 @@ const Application = () => {
           </Typography>
         </Box>
       ) : (
-        <Box height="calc(100vh - 160px)" width="100%">
+        <Box height="calc(100vh - 150px)" width="100%">
           <DataGrid
             rows={filteredRows}
             columns={columns}
