@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 const useGlobalStore = create((set) => ({
-  theme: "light",
+  theme: "dark",
   online: navigator.onLine,
 
   setOnline: (value) => set({ online: value }),

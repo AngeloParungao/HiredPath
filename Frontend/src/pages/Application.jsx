@@ -84,13 +84,17 @@ const Application = () => {
     },
   ];
 
-  const filteredRows = applications.filter(
-    (row) =>
-      (searchTerm
-        ? row.job_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          row.company.toLowerCase().includes(searchTerm.toLowerCase())
-        : true) && (statusFilter ? row.status === statusFilter : true)
-  );
+  const filteredRows = applications
+    .filter(
+      (row) =>
+        (searchTerm
+          ? row.job_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            row.company.toLowerCase().includes(searchTerm.toLowerCase())
+          : true) && (statusFilter ? row.status === statusFilter : true)
+    )
+    .sort((a, b) =>
+      dayjs(a.date_applied).isBefore(dayjs(b.date_applied)) ? 1 : -1
+    );
 
   return (
     <Box

@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import axios from "axios";
-import { Alert, Snackbar } from "@mui/material";
 const backend_url = import.meta.env.VITE_BACKEND_URL;
 
 const useApplicationStore = create((set) => ({
