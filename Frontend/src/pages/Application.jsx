@@ -248,8 +248,10 @@ const Application = () => {
             pageSizeOptions={[15]}
             checkboxSelection
             onRowSelectionModelChange={(selectionModel) => {
-              const ids = Array.from(selectionModel || []);
-              setSelectedRows(ids);
+              if (selectionModel?.ids) {
+                const idsArray = Array.from(selectionModel.ids);
+                setSelectedRows(idsArray);
+              }
             }}
             sx={(theme) => ({
               backgroundColor: theme.palette.gray[900],

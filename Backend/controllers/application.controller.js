@@ -1,4 +1,5 @@
 const db = require("../config/supabase");
+const { createNotification } = require("../services/notification.service");
 
 const createApplication = async (req, res) => {
   const { job_title, company, status, date_applied } = req.body;
@@ -16,6 +17,14 @@ const createApplication = async (req, res) => {
     const values = [job_title, company, status, date_applied];
 
     const result = await db.query(query, values);
+
+    await createNotification({
+      user_id: 1,
+      heading: "Application",
+      message: `Application for ${job_title} at ${company} added.`,
+      is_read: false,
+    });
+
     res.status(201).json({
       message: "Application created successfully",
       application: result.rows[0],
@@ -49,18 +58,32 @@ const updateApplication = async (req, res) => {
   let query = "";
   const values = [id];
 
-  if (status) {
-    query = "UPDATE applications SET status = $1 WHERE id = $2";
-    values.unshift(status);
-  }
-
-  if (interview_date) {
-    query = "UPDATE applications SET interview_date = $1 WHERE id = $2";
-    values.unshift(interview_date);
-  }
-
   try {
+    const existing = await db.query(
+      "SELECT * FROM applications WHERE id = $1",
+      [id]
+    );
+    const details = existing.rows[0];
+
+    if (status) {
+      query = "UPDATE applications SET status = $1 WHERE id = $2";
+      values.unshift(status);
+    }
+
+    if (interview_date) {
+      query = "UPDATE applications SET interview_date = $1 WHERE id = $2";
+      values.unshift(interview_date);
+    }
+
     await db.query(query, values);
+
+    await createNotification({
+      user_id: 1,
+      heading: "Application Updated",
+      message: `Application for ${details.job_title} at ${details.company} updated with status ${status}.`,
+      is_read: false,
+    });
+
     res.status(200).json({
       message: "Application updated successfully",
       application: {
@@ -77,10 +100,19 @@ const updateApplication = async (req, res) => {
 
 const deleteApplications = async (req, res) => {
   const ids = req.body.ids;
+  console.log(ids);
   try {
     const query = "DELETE from applications WHERE id = ANY($1)";
 
     await db.query(query, [ids]);
+
+    await createNotification({
+      user_id: 1,
+      heading: "Application Deleted",
+      message: `Application(s) have been deleted.`,
+      is_read: false,
+    });
+
     res.status(200).json({ message: "Applications deleted successfully" });
   } catch (error) {
     console.error("Error deleting applications:", error);

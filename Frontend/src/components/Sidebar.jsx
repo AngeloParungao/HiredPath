@@ -24,7 +24,7 @@ const Sidebar = () => {
   const navItems = [
     { label: "Dashboard", icon: <DashboardIcon />, to: "/" },
     { label: "Application", icon: <WorkIcon />, to: "/application" },
-    { label: "Notification", icon: <NotificationsIcon />, to: "/notification" },
+    // { label: "Notification", icon: <NotificationsIcon />, to: "/notification" },
   ];
 
   const userItems = [
