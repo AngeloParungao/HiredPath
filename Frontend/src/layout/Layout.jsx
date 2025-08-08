@@ -8,15 +8,21 @@ import InternetChecker from "../components/InternetChecker";
 import useGlobalStore from "../store/globalStore";
 import { useEffect } from "react";
 import useApplicationStore from "../store/applicationStore";
+import useNotificationStore from "../store/notificationStore";
 
 const Layout = () => {
   const { theme } = useGlobalStore();
-  const { fetchApplications } = useApplicationStore();
+  const { applications, fetchApplications } = useApplicationStore();
+  const { fetchNotifications } = useNotificationStore();
   const mode = getTheme(theme);
 
   useEffect(() => {
     fetchApplications(1);
   }, []);
+
+  useEffect(() => {
+    fetchNotifications(1);
+  }, [applications]);
 
   return (
     <ThemeProvider theme={mode}>

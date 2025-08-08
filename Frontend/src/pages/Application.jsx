@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Typography,
   Select,
@@ -33,6 +33,17 @@ const Application = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
 
   const columns = [
     {
@@ -84,17 +95,21 @@ const Application = () => {
     },
   ];
 
-  const filteredRows = applications
-    .filter(
-      (row) =>
-        (searchTerm
-          ? row.job_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            row.company.toLowerCase().includes(searchTerm.toLowerCase())
-          : true) && (statusFilter ? row.status === statusFilter : true)
-    )
-    .sort((a, b) =>
-      dayjs(a.date_applied).isBefore(dayjs(b.date_applied)) ? 1 : -1
-    );
+  const filteredRows = useMemo(() => {
+    return applications
+      .filter(
+        (row) =>
+          (debouncedSearch
+            ? row.job_title
+                .toLowerCase()
+                .includes(debouncedSearch.toLowerCase()) ||
+              row.company.toLowerCase().includes(debouncedSearch.toLowerCase())
+            : true) && (statusFilter ? row.status === statusFilter : true)
+      )
+      .sort((a, b) =>
+        dayjs(a.date_applied).isBefore(dayjs(b.date_applied)) ? 1 : -1
+      );
+  }, [applications, debouncedSearch, statusFilter]);
 
   return (
     <Box
@@ -237,6 +252,7 @@ const Application = () => {
         <Box height="calc(100vh - 150px)" width="100%">
           <DataGrid
             rows={filteredRows}
+            getRowId={(row) => row.id}
             columns={columns}
             initialState={{
               pagination: {
