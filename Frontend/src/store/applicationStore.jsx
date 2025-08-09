@@ -2,8 +2,9 @@ import { create } from "zustand";
 import axios from "axios";
 const backend_url = import.meta.env.VITE_BACKEND_URL;
 
-const useApplicationStore = create((set) => ({
+const useApplicationStore = create((set, get) => ({
   applications: [],
+  filteredApplications: [],
   loading: false,
   error: null,
 
@@ -30,13 +31,53 @@ const useApplicationStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       const res = await axios.get(`${backend_url}/api/application/fetch/${id}`);
-      set({ applications: res.data.applications, loading: false });
+      set({
+        applications: res.data.applications,
+        filteredApplications: res.data.applications,
+        loading: false,
+      });
     } catch (err) {
       set({
         error: err.response?.data?.error || "Failed to fetch applications",
         loading: false,
       });
     }
+  },
+
+  filterApplications: (searchTerm, statusFilter) => {
+    const { applications } = get();
+    let filteredApplications = applications;
+
+    set({ loading: true });
+
+    const timeoutId = get().timeoutId;
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
+    const newTimeoutId = setTimeout(async () => {
+      if (searchTerm) {
+        filteredApplications = filteredApplications.filter(
+          (application) =>
+            application.company
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            application.job_title
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())
+        );
+      }
+
+      if (statusFilter) {
+        filteredApplications = filteredApplications.filter(
+          (application) => application.status === statusFilter
+        );
+      }
+
+      set({ loading: false, filteredApplications, timeoutId: null });
+    }, 1000);
+
+    set({ timeoutId: newTimeoutId });
   },
 
   updateApplication: async (id, status, interviewDate) => {

@@ -15,7 +15,6 @@ import { Skeleton, Grid } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CircularProgress from "@mui/material/CircularProgress";
 import useApplicationStore from "../store/applicationStore";
 import ApplicationForm from "../components/ApplicationForm";
 import { statusOptions, statusColors } from "../constant/seed";
@@ -26,90 +25,75 @@ import dayjs from "dayjs";
 import TopBar from "../components/TopBar";
 
 const Application = () => {
-  const { applications, loading, updateApplication, deleteApplications } =
-    useApplicationStore();
+  const {
+    filteredApplications,
+    loading,
+    filterApplications,
+    updateApplication,
+    deleteApplications,
+  } = useApplicationStore();
   const { online } = useGlobalStore();
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-    }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchTerm]);
-
-  const columns = [
-    {
-      field: "job_title",
-      headerName: "Job Title",
-      flex: 1,
-      renderCell: (params) => params.value,
-    },
-    {
-      field: "company",
-      headerName: "Company",
-      flex: 1,
-      renderCell: (params) => params.value,
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      flex: 1,
-      renderCell: (params) => (
-        <Select
-          value={params.value}
-          onChange={(e) => updateApplication(params.row.id, e.target.value)}
-          size="small"
-          sx={{
-            minWidth: 110,
-            color: (theme) =>
-              theme.palette[statusColors[params.value]].contrastText,
-            "& .MuiOutlinedInput-notchedOutline": {
-              border: "none",
-            },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              border: "none",
-            },
-          }}
-        >
-          {statusOptions.map((status) => (
-            <MenuItem key={status} value={status}>
-              <Chip label={status} color={statusColors[status]} size="small" />
-            </MenuItem>
-          ))}
-        </Select>
-      ),
-    },
-    {
-      field: "date_applied",
-      headerName: "Date Applied",
-      flex: 1,
-      renderCell: (params) => dayjs(params.value).format("YYYY-MM-DD"),
-    },
-  ];
-
-  const filteredRows = useMemo(() => {
-    return applications
-      .filter(
-        (row) =>
-          (debouncedSearch
-            ? row.job_title
-                .toLowerCase()
-                .includes(debouncedSearch.toLowerCase()) ||
-              row.company.toLowerCase().includes(debouncedSearch.toLowerCase())
-            : true) && (statusFilter ? row.status === statusFilter : true)
-      )
-      .sort((a, b) =>
-        dayjs(a.date_applied).isBefore(dayjs(b.date_applied)) ? 1 : -1
-      );
-  }, [applications, debouncedSearch, statusFilter]);
+  const columns = useMemo(
+    () => [
+      {
+        field: "job_title",
+        headerName: "Job Title",
+        flex: 1,
+        renderCell: (params) => params.value,
+      },
+      {
+        field: "company",
+        headerName: "Company",
+        flex: 1,
+        renderCell: (params) => params.value,
+      },
+      {
+        field: "status",
+        headerName: "Status",
+        flex: 1,
+        renderCell: (params) => (
+          <Select
+            value={params.value}
+            onChange={(e) => updateApplication(params.row.id, e.target.value)}
+            size="small"
+            sx={{
+              minWidth: 110,
+              color: (theme) =>
+                theme.palette[statusColors[params.value]].contrastText,
+              "& .MuiOutlinedInput-notchedOutline": {
+                border: "none",
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                border: "none",
+              },
+            }}
+          >
+            {statusOptions.map((status) => (
+              <MenuItem key={status} value={status}>
+                <Chip
+                  label={status}
+                  color={statusColors[status]}
+                  size="small"
+                />
+              </MenuItem>
+            ))}
+          </Select>
+        ),
+      },
+      {
+        field: "date_applied",
+        headerName: "Date Applied",
+        flex: 1,
+        renderCell: (params) => dayjs(params.value).format("YYYY-MM-DD"),
+      },
+    ],
+    [statusColors, statusOptions, updateApplication]
+  );
 
   return (
     <Box
@@ -136,7 +120,10 @@ const Application = () => {
               size="small"
               placeholder="Search job title or company"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                filterApplications(e.target.value, statusFilter);
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -169,7 +156,10 @@ const Application = () => {
           ) : (
             <Select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                filterApplications(searchTerm, e.target.value);
+              }}
               displayEmpty
               size="small"
               sx={(theme) => ({
@@ -251,7 +241,7 @@ const Application = () => {
       ) : (
         <Box height="calc(100vh - 150px)" width="100%">
           <DataGrid
-            rows={filteredRows}
+            rows={filteredApplications}
             getRowId={(row) => row.id}
             columns={columns}
             initialState={{
