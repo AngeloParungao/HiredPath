@@ -2,6 +2,12 @@ import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell } from "recharts";
 import { PieChart as MUIPieChart } from "@mui/x-charts/PieChart";
 import { LineChart } from "@mui/x-charts/LineChart";
+import {
+  GaugeContainer,
+  GaugeValueArc,
+  GaugeReferenceArc,
+  useGaugeState,
+} from "@mui/x-charts/Gauge";
 import { Box, Skeleton, Typography } from "@mui/material";
 import WorkIcon from "@mui/icons-material/Work";
 import TopBar from "../components/TopBar";
@@ -48,9 +54,9 @@ const Dashboard = () => {
   const [lineData, setLineData] = useState([]);
   const [data, setData] = useState([
     { label: "Applied", value: "", color: "#0088FE" },
-    { label: "Offer", value: "", color: "#00C49F" },
     { label: "Interview", value: "", color: "#FFBB28" },
     { label: "Rejected", value: "", color: "#ff3f3fff" },
+    { label: "Offer", value: "", color: "#00C49F" },
   ]);
 
   useEffect(() => {
@@ -132,7 +138,7 @@ const Dashboard = () => {
           flexDirection="column"
           gap={2}
           height="100%"
-          width="60%"
+          width="75%"
         >
           <Box display="flex" alignItems="center" gap={2} height="40%">
             {/* APPLICATION BOX */}
@@ -155,7 +161,6 @@ const Dashboard = () => {
                   flexDirection: "row",
                   justifyContent: "space-around",
                   alignItems: "center",
-                  gap: 2,
                   height: "100%",
                 })}
               >
@@ -170,7 +175,7 @@ const Dashboard = () => {
                   </Typography>
 
                   <Typography variant="h6" color="#00C49F">
-                    Applications
+                    Total Applications
                   </Typography>
                 </Box>
                 <Box
@@ -269,7 +274,7 @@ const Dashboard = () => {
           <Box
             sx={(theme) => ({
               backgroundColor: theme.palette.gray[800],
-              padding: 2,
+              padding: 4,
               borderRadius: 2,
               width: "100%",
               height: "60%",
@@ -287,7 +292,7 @@ const Dashboard = () => {
                 sx={{ borderRadius: 2 }}
               />
             ) : (
-              <Box display="flex" alignItems="center" gap={1} p={1}>
+              <Box display="flex" alignItems="center" gap={1}>
                 <AccessTimeFilledIcon
                   sx={{ color: "primary.light", fontSize: 25 }}
                 />
@@ -331,14 +336,70 @@ const Dashboard = () => {
             )}
           </Box>
         </Box>
+        {/* RIGHT SIDE */}
         <Box
           sx={(theme) => ({
             backgroundColor: theme.palette.gray[800],
             padding: 2,
             borderRadius: 2,
             flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
           })}
-        ></Box>
+        >
+          {loading || !online ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                variant="rectangular"
+                height="100%"
+                width="100%"
+                animation="wave"
+                sx={{ borderRadius: 2 }}
+              />
+            ))
+          ) : (
+            <>
+              {data.map((data, index) => (
+                <Box
+                  key={index}
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
+                  px={4}
+                  width="100%"
+                  flex={1}
+                  backgroundColor="gray.900"
+                  borderRadius={2}
+                >
+                  <Box width="50%">
+                    <GaugeContainer
+                      width={110}
+                      height={100}
+                      startAngle={-110}
+                      endAngle={110}
+                      value={data.value}
+                    >
+                      <GaugeReferenceArc />
+                      <GaugeValueArc style={{ fill: data.color }} />
+                    </GaugeContainer>
+                  </Box>
+                  <Box>
+                    <Typography
+                      variant="h4"
+                      color={data.color}
+                      fontWeight={600}
+                    >
+                      {data.value}
+                    </Typography>
+                    <Typography variant="span">{data.label}</Typography>
+                  </Box>
+                </Box>
+              ))}
+            </>
+          )}
+        </Box>
       </Box>
     </Box>
   );
