@@ -18,10 +18,15 @@ import useNotificationStore from "../store/notificationStore";
 
 const TopBar = ({ header }) => {
   const { theme, setTheme } = useGlobalStore();
-  const { notifications } = useNotificationStore();
+  const { notifications, updateNotificationIsRead } = useNotificationStore();
   const [isOpenDrawer, setIsOpenDrawer] = useState(false);
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+  const updateNotifications = () => {
+    updateNotificationIsRead(1);
+    setIsOpenDrawer(false);
+  };
 
   return (
     <>
@@ -52,7 +57,7 @@ const TopBar = ({ header }) => {
       <Drawer
         anchor="right"
         open={isOpenDrawer}
-        onClose={() => setIsOpenDrawer(false)}
+        onClose={() => updateNotifications()}
       >
         <Box
           sx={(theme) => ({
@@ -103,7 +108,7 @@ const TopBar = ({ header }) => {
                         primary={notification.heading}
                         secondary={
                           <>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="p" color="text.secondary">
                               {notification.message}
                             </Typography>
                             <Typography

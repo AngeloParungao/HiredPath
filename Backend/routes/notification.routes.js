@@ -1,7 +1,11 @@
 const express = require("express");
-const { fetchNotification } = require("../controllers/notification.controller");
+const {
+  fetchNotification,
+  updateNotificationRead,
+} = require("../controllers/notification.controller");
 const router = express.Router();
 
 router.get("/fetch/:id", fetchNotification);
+router.put("/:id", updateNotificationRead);
 
 module.exports = router;
