@@ -6,6 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/user", require("./routes/user.routes"));
 app.use("/api/application", require("./routes/application.routes"));
 app.use("/api/notification", require("./routes/notification.routes"));
 

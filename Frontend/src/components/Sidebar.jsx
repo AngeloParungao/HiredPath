@@ -1,6 +1,7 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Box,
-  Switch,
   List,
   ListItem,
   ListItemButton,
@@ -10,15 +11,14 @@ import {
   Typography,
   Tooltip,
 } from "@mui/material";
-import { Link } from "react-router-dom";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import WorkIcon from "@mui/icons-material/Work";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { useState } from "react";
+import useAuthStore from "../store/authStore";
 
 const Sidebar = () => {
+  const { logout } = useAuthStore();
   const [hovered, setHovered] = useState(false);
 
   const navItems = [
@@ -29,7 +29,11 @@ const Sidebar = () => {
 
   const userItems = [
     { label: "Profile", icon: <PersonIcon />, to: "/profile" },
-    { label: "Logout", icon: <LogoutIcon />, to: "/logout" },
+    {
+      label: "Logout",
+      icon: <LogoutIcon />,
+      action: logout,
+    },
   ];
 
   return (
@@ -109,7 +113,11 @@ const Sidebar = () => {
           {userItems.map((item) => (
             <ListItem key={item.label} disablePadding>
               <Tooltip title={!hovered ? item.label : ""} placement="right">
-                <ListItemButton component={Link} to={item.to}>
+                <ListItemButton
+                  component={item.to ? Link : "button"}
+                  to={item.to}
+                  onClick={item.action}
+                >
                   <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
 
                   <ListItemText
