@@ -37,20 +37,24 @@ const LoginForm = () => {
               name="email"
               type="email"
               label="Email Address"
-              startIcon={<Email />}
+              startIcon={<Email fontSize="small" />}
             />
 
             <TextInput
               name="password"
               type={showPassword ? "text" : "password"}
               label="Password"
-              startIcon={<Lock />}
+              startIcon={<Lock fontSize="small" />}
               endIcon={
                 <IconButton
                   onClick={() => setShowPassword(!showPassword)}
                   edge="end"
                 >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                  {showPassword ? (
+                    <VisibilityOff fontSize="small" />
+                  ) : (
+                    <Visibility fontSize="small" />
+                  )}
                 </IconButton>
               }
             />
@@ -64,7 +68,7 @@ const LoginForm = () => {
                 mt: 1,
                 py: 1.5,
                 background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
-                boxShadow: "0 3px 5px 2px rgba(33, 203, 243, .3)",
+                // boxShadow: "0 3px 5px 2px rgba(33, 203, 243, .3)",
               }}
             >
               {isSubmitting ? "Signing In..." : "Sign In"}

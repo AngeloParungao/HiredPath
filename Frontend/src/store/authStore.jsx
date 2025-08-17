@@ -2,6 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 import useApplicationStore from "./applicationStore";
 import useNotificationStore from "./notificationStore";
+import useGlobalStore from "./globalStore";
 const backend_url = import.meta.env.VITE_BACKEND_URL;
 
 const useAuthStore = create((set) => ({
@@ -25,14 +26,43 @@ const useAuthStore = create((set) => ({
         set({ isAuthenticated: true, user: data.user });
         useApplicationStore.getState().fetchApplications(data.user.id);
         useNotificationStore.getState().fetchNotifications(data.user.id);
-      } else {
-        console.error(data.error);
+        setSubmitting(false);
+        resetForm();
       }
     } catch (error) {
+      const errorMessage = error?.response?.data?.error || error.message;
       console.error("Something went wrong:", error);
-    } finally {
-      setSubmitting(false);
-      resetForm();
+      useGlobalStore.getState().showSnackbar(errorMessage, "error");
+    }
+  },
+
+  handleRegister: async (values, { setSubmitting, resetForm }) => {
+    const token = localStorage.getItem("token");
+    try {
+      const result = await axios.post(
+        `${backend_url}/api/user/register`,
+        values,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = result.data;
+
+      if (result.status === 200) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        set({ isAuthenticated: true, user: data.user });
+        setSubmitting(false);
+        resetForm();
+      }
+    } catch (error) {
+      const errorMessage = error?.response?.data?.error || error.message;
+      console.error("Something went wrong:", error);
+      useGlobalStore.getState().showSnackbar(errorMessage, "error");
     }
   },
 

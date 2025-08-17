@@ -31,7 +31,7 @@ const login = async (req, res) => {
 };
 
 const register = async (req, res) => {
-  const { first_name, last_name, contact_no, email, password } = req.body;
+  const { firstName, lastName, contactNo, email, password } = req.body;
   try {
     const emailAvailable = await db.query(
       "SELECT * FROM users WHERE email = $1",
@@ -46,7 +46,7 @@ const register = async (req, res) => {
 
     const result = await db.query(
       "INSERT INTO users (first_name, last_name, contact_no, email, password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [first_name, last_name, contact_no, email, hashedPassword]
+      [firstName, lastName, contactNo, email, hashedPassword]
     );
 
     const user = result.rows[0];

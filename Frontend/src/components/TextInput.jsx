@@ -1,38 +1,47 @@
 import React from "react";
 import { Field } from "formik";
-import { InputAdornment, TextField } from "@mui/material";
+import { TextField, InputAdornment, IconButton } from "@mui/material";
 
-const TextInput = ({
-  name,
-  label,
-  type = "text",
-  startIcon,
-  endIcon,
-  ...props
-}) => {
+const TextInput = ({ name, label, type = "text", startIcon, endIcon }) => {
   return (
     <Field name={name}>
       {({ field, meta }) => (
         <TextField
           {...field}
-          {...props}
           label={label}
           type={type}
-          variant="outlined"
           fullWidth
-          error={meta.touched && !!meta.error}
+          variant="outlined"
+          error={meta.touched && meta.error}
           helperText={meta.touched && meta.error}
           InputProps={{
             startAdornment: startIcon && (
               <InputAdornment position="start">
-                {React.cloneElement(startIcon, {
-                  color: meta.touched && meta.error ? "error" : "action",
-                })}
+                <IconButton
+                  size="small"
+                  color={meta.touched && meta.error ? "error" : "action"}
+                >
+                  {startIcon}
+                </IconButton>
               </InputAdornment>
             ),
             endAdornment: endIcon && (
               <InputAdornment position="end">{endIcon}</InputAdornment>
             ),
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "primary",
+                borderRadius: 5,
+              },
+              "&:hover fieldset": {
+                borderColor: "primary",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "primary",
+              },
+            },
           }}
         />
       )}
