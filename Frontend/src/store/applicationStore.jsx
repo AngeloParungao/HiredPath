@@ -11,9 +11,15 @@ const useApplicationStore = create((set, get) => ({
   createApplication: async (data) => {
     set({ loading: true, error: null });
     try {
+      const token = localStorage.getItem("token");
       const res = await axios.post(
         `${backend_url}/api/application/create`,
-        data
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       set((state) => ({
         applications: [...state.applications, res.data.application],
@@ -30,7 +36,15 @@ const useApplicationStore = create((set, get) => ({
   fetchApplications: async (id) => {
     set({ loading: true, error: null });
     try {
-      const res = await axios.get(`${backend_url}/api/application/fetch/${id}`);
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `${backend_url}/api/application/fetch/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       set({
         applications: res.data.applications,
         filteredApplications: res.data.applications,
@@ -82,19 +96,28 @@ const useApplicationStore = create((set, get) => ({
 
   updateApplication: async (id, status, interviewDate) => {
     const data = {};
-
-    if (status) {
-      data.status = status;
-    }
-    if (interviewDate) {
-      data.interview_date = interviewDate;
-    }
+    if (status) data.status = status;
+    if (interviewDate) data.interview_date = interviewDate;
 
     set({ error: null });
     try {
-      const res = await axios.put(`${backend_url}/api/application/${id}`, data);
+      const token = localStorage.getItem("token");
+      const res = await axios.put(
+        `${backend_url}/api/application/${id}`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       set((state) => ({
         applications: state.applications.map((application) =>
+          application.id === id
+            ? { ...application, ...res.data.application }
+            : application
+        ),
+        filteredApplications: state.filteredApplications.map((application) =>
           application.id === id
             ? { ...application, ...res.data.application }
             : application
@@ -110,12 +133,17 @@ const useApplicationStore = create((set, get) => ({
   deleteApplications: async (ids) => {
     set({ error: null });
     try {
+      const token = localStorage.getItem("token");
       await axios.delete(`${backend_url}/api/application/`, {
         data: { ids },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       set((state) => ({
         applications: state.applications.filter(
+          (application) => !ids.includes(application.id)
+        ),
+        filteredApplications: state.filteredApplications.filter(
           (application) => !ids.includes(application.id)
         ),
       }));

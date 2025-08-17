@@ -6,10 +6,11 @@ const {
   deleteApplications,
   updateApplication,
 } = require("../controllers/application.controller");
+const authenticateToken = require("../middleware/authMiddleware");
 
-router.post("/create", createApplication);
-router.get("/fetch/:id", fetchApplications);
-router.put("/:id", updateApplication);
-router.delete("/", deleteApplications);
+router.post("/create", authenticateToken, createApplication);
+router.get("/fetch/:id", authenticateToken, fetchApplications);
+router.put("/:id", authenticateToken, updateApplication);
+router.delete("/", authenticateToken, deleteApplications);
 
 module.exports = router;

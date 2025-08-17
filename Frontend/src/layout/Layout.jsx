@@ -9,19 +9,21 @@ import useGlobalStore from "../store/globalStore";
 import { useEffect } from "react";
 import useApplicationStore from "../store/applicationStore";
 import useNotificationStore from "../store/notificationStore";
+import useAuthStore from "../store/authStore";
 
 const Layout = () => {
   const { theme } = useGlobalStore();
+  const { user } = useAuthStore();
   const { applications, fetchApplications } = useApplicationStore();
   const { fetchNotifications } = useNotificationStore();
   const mode = getTheme(theme);
 
   useEffect(() => {
-    fetchApplications(1);
+    fetchApplications(user?.id);
   }, []);
 
   useEffect(() => {
-    fetchNotifications(1);
+    fetchNotifications(user?.id);
   }, [applications]);
 
   return (

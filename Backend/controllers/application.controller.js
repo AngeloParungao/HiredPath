@@ -3,6 +3,7 @@ const { createNotification } = require("../services/notification.service");
 
 const createApplication = async (req, res) => {
   const { job_title, company, status, date_applied } = req.body;
+  const user_id = req.user.id;
 
   if (!job_title || !company || !status || !date_applied) {
     return res.status(400).json({ error: "All fields are required" });
@@ -10,16 +11,16 @@ const createApplication = async (req, res) => {
 
   try {
     const query = `
-      INSERT INTO applications (job_title, company, status, date_applied)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO applications (user_id, job_title, company, status, date_applied)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *
     `;
-    const values = [job_title, company, status, date_applied];
+    const values = [user_id, job_title, company, status, date_applied];
 
     const result = await db.query(query, values);
 
     await createNotification({
-      user_id: 1,
+      user_id: user_id,
       heading: "Application",
       message: `Application for ${job_title} at ${company} added.`,
       is_read: false,
@@ -54,6 +55,7 @@ const fetchApplications = async (req, res) => {
 const updateApplication = async (req, res) => {
   const { id } = req.params;
   const { status, interview_date } = req.body;
+  const user_id = req.user.id;
 
   let query = "";
   const values = [id];
@@ -78,7 +80,7 @@ const updateApplication = async (req, res) => {
     await db.query(query, values);
 
     await createNotification({
-      user_id: 1,
+      user_id: user_id,
       heading: "Application Updated",
       message: `Application for ${details.job_title} at ${details.company} updated with status ${status}.`,
       is_read: false,
@@ -99,15 +101,16 @@ const updateApplication = async (req, res) => {
 };
 
 const deleteApplications = async (req, res) => {
-  const ids = req.body.ids;
-  console.log(ids);
+  const { ids } = req.body;
+  const user_id = req.user.id;
+
   try {
     const query = "DELETE from applications WHERE id = ANY($1)";
 
     await db.query(query, [ids]);
 
     await createNotification({
-      user_id: 1,
+      user_id: user_id,
       heading: "Application Deleted",
       message: `Application(s) have been deleted.`,
       is_read: false,

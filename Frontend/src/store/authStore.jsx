@@ -1,10 +1,14 @@
 import { create } from "zustand";
 import axios from "axios";
+import useApplicationStore from "./applicationStore";
+import useNotificationStore from "./notificationStore";
 const backend_url = import.meta.env.VITE_BACKEND_URL;
 
 const useAuthStore = create((set) => ({
   isAuthenticated: !!localStorage.getItem("token"),
-  user: null,
+  user: localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : null,
 
   handleLogin: async (values, { setSubmitting, resetForm }) => {
     try {
@@ -16,8 +20,11 @@ const useAuthStore = create((set) => ({
 
       if (result.status === 200) {
         localStorage.setItem("token", data.token);
-        console.log("Login success:", data);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
         set({ isAuthenticated: true, user: data.user });
+        useApplicationStore.getState().fetchApplications(data.user.id);
+        useNotificationStore.getState().fetchNotifications(data.user.id);
       } else {
         console.error(data.error);
       }
