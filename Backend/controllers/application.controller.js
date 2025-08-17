@@ -39,7 +39,7 @@ const createApplication = async (req, res) => {
 const fetchApplications = async (req, res) => {
   const id = req.params.id;
   try {
-    const query = `SELECT * FROM applications WHERE user_id = $1`;
+    const query = `SELECT * FROM applications WHERE user_id = $1 ORDER BY date_applied DESC`;
     const value = id;
 
     const result = await db.query(query, [value]);

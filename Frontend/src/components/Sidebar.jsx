@@ -24,7 +24,6 @@ const Sidebar = () => {
   const navItems = [
     { label: "Dashboard", icon: <DashboardIcon />, to: "/" },
     { label: "Application", icon: <WorkIcon />, to: "/application" },
-    // { label: "Notification", icon: <NotificationsIcon />, to: "/notification" },
   ];
 
   const userItems = [
@@ -83,7 +82,11 @@ const Sidebar = () => {
           {navItems.map((item) => (
             <ListItem key={item.label} disablePadding>
               <Tooltip title={!hovered ? item.label : ""} placement="right">
-                <ListItemButton component={Link} to={item.to}>
+                <ListItemButton
+                  component={Link}
+                  to={item.to}
+                  disabled={item.label === "Profile"}
+                >
                   <ListItemIcon
                     sx={{
                       minWidth: 40,
@@ -117,6 +120,7 @@ const Sidebar = () => {
                   component={item.to ? Link : "button"}
                   to={item.to}
                   onClick={item.action}
+                  disabled={item.label === "Profile"}
                 >
                   <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
 

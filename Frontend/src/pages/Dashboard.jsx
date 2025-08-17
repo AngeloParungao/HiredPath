@@ -53,10 +53,10 @@ const Dashboard = () => {
   const [applicationDelta, setApplicationDelta] = useState(0);
   const [lineData, setLineData] = useState([]);
   const [data, setData] = useState([
-    { label: "Applied", value: "", color: "#0088FE" },
-    { label: "Interview", value: "", color: "#FFBB28" },
-    { label: "Rejected", value: "", color: "#ff3f3fff" },
-    { label: "Offer", value: "", color: "#00C49F" },
+    { label: "Applied", value: 0, color: "#0088FE" },
+    { label: "Interview", value: 0, color: "#FFBB28" },
+    { label: "Rejected", value: 0, color: "#ff3f3fff" },
+    { label: "Offer", value: 0, color: "#00C49F" },
   ]);
 
   useEffect(() => {
@@ -64,6 +64,8 @@ const Dashboard = () => {
     getApplicationPercentage();
     getApplicationsOverTime();
   }, [applications]);
+
+  const total = data.reduce((acc, item) => acc + (Number(item.value) || 0), 0);
 
   const filterStatus = () => {
     setData(
@@ -259,8 +261,10 @@ const Dashboard = () => {
                       {
                         innerRadius: 30,
                         outerRadius: 60,
-                        data,
-                        // arcLabel: "value",
+                        data:
+                          total === 0
+                            ? [{ label: "No Data", value: 1, color: "#D3D3D3" }] // gray circle
+                            : data,
                       },
                     ]}
                     width={150}

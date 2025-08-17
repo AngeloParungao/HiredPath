@@ -29,7 +29,9 @@ const Auth = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        backgroundColor: "#0a0a0aff", // solid color behind
         backgroundImage: "url(./assets/images/HIREDPATH.png)",
+        backgroundRepeat: "no-repeat",
         backgroundSize: "cover",
         backgroundPosition: "center",
         p: 2,
@@ -52,21 +54,25 @@ const Auth = () => {
         }}
       >
         <Box textAlign="center" mb={2} height="100%" overflow="auto">
-          <Typography
-            variant="h4"
-            component="h1"
-            gutterBottom
-            sx={{
-              fontWeight: "bold",
-              background: "linear-gradient(45deg, #667eea, #764ba2)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              mb: 1,
-            }}
-          >
-            Welcome
-          </Typography>
+          <Box>
+            <img
+              src="./assets/images/HiredPathLogo.png"
+              alt="HiredPath"
+              height={40}
+            />
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              sx={{
+                fontWeight: "bold",
+                color: "#217cc5",
+                mb: 1,
+              }}
+            >
+              Welcome
+            </Typography>
+          </Box>
           <Typography variant="body2" color="text.secondary">
             {tabValue === 0
               ? "Sign in to your account"
