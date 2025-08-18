@@ -23,6 +23,7 @@ import { Waveform } from "ldrs/react";
 import "ldrs/react/Waveform.css";
 import dayjs from "dayjs";
 import TopBar from "../components/TopBar";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 const Application = () => {
   const {
@@ -59,7 +60,9 @@ const Application = () => {
         renderCell: (params) => (
           <Select
             value={params.value}
-            onChange={(e) => updateApplication(params.row.id, e.target.value)}
+            onChange={(e) =>
+              updateApplication(params.row.id, { status: e.target.value })
+            }
             size="small"
             sx={{
               minWidth: 110,
@@ -90,6 +93,33 @@ const Application = () => {
         headerName: "Date Applied",
         flex: 1,
         renderCell: (params) => dayjs(params.value).format("YYYY-MM-DD"),
+      },
+      {
+        field: "interview_date",
+        headerName: "Interview Date",
+        flex: 1,
+        renderCell: (params) =>
+          params.row.status !== "Interview" ? null : (
+            <div onClick={(e) => e.stopPropagation()}>
+              <DatePicker
+                sx={{ mt: "5px" }}
+                value={params.value ? dayjs(params.value) : null}
+                onChange={(newValue) => {
+                  if (newValue) {
+                    updateApplication(params.row.id, {
+                      interview_date: dayjs(newValue).format("YYYY-MM-DD"),
+                    });
+                  }
+                }}
+                slotProps={{
+                  textField: {
+                    variant: "outlined",
+                    size: "small",
+                  },
+                }}
+              />
+            </div>
+          ),
       },
     ],
     [statusColors, statusOptions, updateApplication]

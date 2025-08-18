@@ -2,20 +2,33 @@ const db = require("../config/supabase");
 const { createNotification } = require("../services/notification.service");
 
 const createApplication = async (req, res) => {
-  const { job_title, company, status, date_applied } = req.body;
+  const { job_title, company, status, date_applied, interview_date } = req.body;
   const user_id = req.user.id;
 
-  if (!job_title || !company || !status || !date_applied) {
+  if (
+    !job_title ||
+    !company ||
+    !status ||
+    !date_applied ||
+    (status === "Interview" && !interview_date)
+  ) {
     return res.status(400).json({ error: "All fields are required" });
   }
 
   try {
     const query = `
-      INSERT INTO applications (user_id, job_title, company, status, date_applied)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO applications (user_id, job_title, company, status, date_applied, interview_date)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
     `;
-    const values = [user_id, job_title, company, status, date_applied];
+    const values = [
+      user_id,
+      job_title,
+      company,
+      status,
+      date_applied,
+      interview_date,
+    ];
 
     const result = await db.query(query, values);
 
@@ -79,12 +92,23 @@ const updateApplication = async (req, res) => {
 
     await db.query(query, values);
 
-    await createNotification({
-      user_id: user_id,
-      heading: "Application Updated",
-      message: `Application for ${details.job_title} at ${details.company} updated with status ${status}.`,
-      is_read: false,
-    });
+    if (interview_date) {
+      await createNotification({
+        user_id: user_id,
+        heading: "Interview Date Updated",
+        message: `Interview date for ${details.job_title} at ${details.company} updated.`,
+        is_read: false,
+      });
+    }
+
+    if (status) {
+      await createNotification({
+        user_id: user_id,
+        heading: "Application Updated",
+        message: `Application for ${details.job_title} at ${details.company} updated with status ${status}.`,
+        is_read: false,
+      });
+    }
 
     res.status(200).json({
       message: "Application updated successfully",

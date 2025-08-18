@@ -26,6 +26,7 @@ const ApplicationForm = ({ isOpen, onClose }) => {
     company: "",
     status: "",
     date_applied: dayjs(),
+    interview_date: null,
   });
 
   const handleSubmit = async () => {
@@ -33,6 +34,7 @@ const ApplicationForm = ({ isOpen, onClose }) => {
       job_title: !form.job_title,
       company: !form.company,
       status: !form.status,
+      interview_date: form.status === "Interview" && !form.interview_date,
     };
 
     if (Object.values(newErrors).some(Boolean)) {
@@ -114,7 +116,13 @@ const ApplicationForm = ({ isOpen, onClose }) => {
         <DatePicker
           label="Date Applied"
           value={form.date_applied}
-          onChange={(newValue) => setForm({ ...form, date_applied: newValue })}
+          onChange={(newValue) =>
+            setForm({
+              ...form,
+              date_applied: newValue,
+              interview_date: newStatus === "Interview" ? dayjs() : null,
+            })
+          }
           slotProps={{
             textField: {
               fullWidth: true,
@@ -123,6 +131,28 @@ const ApplicationForm = ({ isOpen, onClose }) => {
             },
           }}
         />
+
+        {form.status === "Interview" && (
+          <DatePicker
+            label="Interview Date"
+            value={form.interview_date}
+            onChange={(newValue) => {
+              setFormErrors({ ...formErrors, interview_date: "" });
+              setForm({ ...form, interview_date: newValue });
+            }}
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                variant: "outlined",
+                margin: "dense",
+                error: formErrors.interview_date,
+                helperText: formErrors.interview_date
+                  ? "Interview date is required"
+                  : "",
+              },
+            }}
+          />
+        )}
       </DialogContent>
 
       <DialogActions>

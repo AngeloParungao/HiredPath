@@ -94,17 +94,14 @@ const useApplicationStore = create((set, get) => ({
     set({ timeoutId: newTimeoutId });
   },
 
-  updateApplication: async (id, status, interviewDate) => {
-    const data = {};
-    if (status) data.status = status;
-    if (interviewDate) data.interview_date = interviewDate;
-
+  updateApplication: async (id, application) => {
+    console.log(application);
     set({ error: null });
     try {
       const token = localStorage.getItem("token");
       const res = await axios.put(
         `${backend_url}/api/application/${id}`,
-        data,
+        application,
         {
           headers: {
             Authorization: `Bearer ${token}`,
