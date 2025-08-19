@@ -8,7 +8,7 @@ import TextInput from "./TextInput";
 import useAuthStore from "../store/authStore";
 
 const LoginForm = () => {
-  const { handleLogin } = useAuthStore();
+  const { handleLogin, requestResetPassword } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const initialValues = {
     email: "",
@@ -30,7 +30,7 @@ const LoginForm = () => {
       validationSchema={loginSchema}
       onSubmit={handleLogin}
     >
-      {({ isSubmitting }) => (
+      {({ isSubmitting, values, validateField, setTouched }) => (
         <Form>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
             <TextInput
@@ -59,20 +59,40 @@ const LoginForm = () => {
               }
             />
 
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              disabled={isSubmitting}
-              sx={{
-                mt: 1,
-                py: 1.5,
-                background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
-                // boxShadow: "0 3px 5px 2px rgba(33, 203, 243, .3)",
-              }}
-            >
-              {isSubmitting ? "Signing In..." : "Sign In"}
-            </Button>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                disabled={isSubmitting}
+                sx={{
+                  mt: 1,
+                  py: 1.5,
+                  background:
+                    "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
+                  // boxShadow: "0 3px 5px 2px rgba(33, 203, 243, .3)",
+                }}
+              >
+                {isSubmitting ? "Signing In..." : "Sign In"}
+              </Button>
+              <Button
+                type="button"
+                variant="text"
+                sx={{
+                  fontSize: 12,
+                  color: "grey.500",
+                }}
+                onClick={async () => {
+                  const error = await validateField("email");
+                  setTouched({ email: true });
+                  if (!error && values.email) {
+                    requestResetPassword(values.email);
+                  }
+                }}
+              >
+                Forgot Password
+              </Button>
+            </Box>
           </Box>
         </Form>
       )}

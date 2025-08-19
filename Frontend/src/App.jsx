@@ -9,6 +9,7 @@ import PublicRoute from "./components/PublicRoute";
 import PrivateRoute from "./components/PrivateRoute";
 import "./index.css";
 import SnackBar from "./components/SnackBar";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <Routes>
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<Auth />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
         </Route>
         <Route element={<PrivateRoute />}>
           <Route path="/" element={<Layout />}>
