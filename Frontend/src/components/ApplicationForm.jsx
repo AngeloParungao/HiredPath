@@ -116,13 +116,13 @@ const ApplicationForm = ({ isOpen, onClose }) => {
         <DatePicker
           label="Date Applied"
           value={form.date_applied}
-          onChange={(newValue) =>
+          onChange={(newValue) => {
             setForm({
               ...form,
               date_applied: newValue,
-              interview_date: newStatus === "Interview" ? dayjs() : null,
-            })
-          }
+              interview_date: form.status === "Interview" ? dayjs() : null,
+            });
+          }}
           slotProps={{
             textField: {
               fullWidth: true,
