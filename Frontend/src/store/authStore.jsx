@@ -13,7 +13,7 @@ const useAuthStore = create((set) => ({
 
   handleLogin: async (values, { setSubmitting, resetForm }) => {
     try {
-      const result = await axios.post(`${backend_url}/api/user/login`, values, {
+      const result = await axios.post(`${backend_url}/api/auth/login`, values, {
         headers: { "Content-Type": "application/json" },
       });
 
@@ -40,7 +40,7 @@ const useAuthStore = create((set) => ({
     const token = localStorage.getItem("token");
     try {
       const result = await axios.post(
-        `${backend_url}/api/user/register`,
+        `${backend_url}/api/auth/register`,
         values,
         {
           headers: {
