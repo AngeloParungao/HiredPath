@@ -3,7 +3,6 @@ import axios from "axios";
 import useApplicationStore from "./applicationStore";
 import useNotificationStore from "./notificationStore";
 import useGlobalStore from "./globalStore";
-import { useParams } from "react-router-dom";
 const backend_url = import.meta.env.VITE_BACKEND_URL;
 
 const useAuthStore = create((set) => ({
@@ -11,6 +10,33 @@ const useAuthStore = create((set) => ({
   user: localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null,
+
+  handleGoogleLogin: async (credentialResponse) => {
+    try {
+      const result = await axios.post(
+        `${backend_url}/api/auth/google`,
+        { credential: credentialResponse.credential }, // 👈 FIXED
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      const data = result.data;
+
+      if (result.status === 200) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        set({ isAuthenticated: true, user: data.user });
+        useApplicationStore.getState().fetchApplications(data.user.id);
+        useNotificationStore.getState().fetchNotifications(data.user.id);
+      }
+    } catch (error) {
+      const errorMessage = error?.response?.data?.error || error.message;
+      console.error("Something went wrong:", error);
+      useGlobalStore.getState().showSnackbar(errorMessage, "error");
+    }
+  },
 
   handleLogin: async (values, { setSubmitting, resetForm }) => {
     try {
@@ -68,8 +94,11 @@ const useAuthStore = create((set) => ({
   },
 
   logout: async () => {
-    localStorage.clear();
+    localStorage.removeItem("token");
     set({ isAuthenticated: false, user: null });
+    if (window.google && window.google.accounts) {
+      window.google.accounts.id.disableAutoSelect();
+    }
   },
 
   requestResetPassword: async (email) => {

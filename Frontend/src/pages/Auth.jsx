@@ -1,8 +1,6 @@
 import { useState } from "react";
 import {
   Box,
-  Card,
-  CardContent,
   Button,
   Typography,
   Tab,
@@ -13,8 +11,11 @@ import {
 import { Google } from "@mui/icons-material";
 import LoginForm from "../components/LoginForm";
 import RegisterForm from "../components/RegisterForm";
+import { GoogleLogin } from "@react-oauth/google";
+import useAuthStore from "../store/authStore";
 
 const Auth = () => {
+  const { handleGoogleLogin } = useAuthStore();
   const [tabValue, setTabValue] = useState(0);
 
   const handleTabChange = (event, newValue) => {
@@ -121,17 +122,20 @@ const Auth = () => {
           </Typography>
         </Divider>
 
-        <Button
-          variant="text"
-          startIcon={<Google />}
-          fullWidth
-          size="large"
+        <Box
           sx={{
-            py: 1.5,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          Continue with Google
-        </Button>
+          <GoogleLogin
+            onSuccess={(credentialResponse) =>
+              handleGoogleLogin(credentialResponse)
+            }
+            onError={() => console.error("Google Sign In Failed")}
+          />
+        </Box>
       </Paper>
     </Box>
   );

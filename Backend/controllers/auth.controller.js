@@ -3,7 +3,52 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const JWT_SECRET = process.env.JWT_SECRET;
+
+const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ error: "Missing Google credential" });
+    }
+
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { email, given_name, family_name } = payload;
+
+    let result = await db.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+
+    let user;
+    if (result.rows.length === 0) {
+      const insertResult = await db.query(
+        `INSERT INTO users (first_name, last_name, email, password) 
+         VALUES ($1, $2, $3, $4) RETURNING *`,
+        [given_name, family_name, email, null]
+      );
+      user = insertResult.rows[0];
+    } else {
+      user = result.rows[0];
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    res.json({ token, user, message: "Google login successful" });
+  } catch (error) {
+    console.error("Google login error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -150,4 +195,10 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { login, register, requestResetPassword, resetPassword };
+module.exports = {
+  login,
+  googleLogin,
+  register,
+  requestResetPassword,
+  resetPassword,
+};
