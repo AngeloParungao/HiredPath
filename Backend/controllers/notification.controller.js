@@ -1,4 +1,4 @@
-const db = require("../config/supabase");
+const { pool } = require("../config/supabase");
 
 const fetchNotification = async (req, res) => {
   const { id } = req.params;
@@ -7,7 +7,7 @@ const fetchNotification = async (req, res) => {
     const query = "SELECT * FROM notifications WHERE user_id = $1";
     const value = [id];
 
-    const result = await db.query(query, value);
+    const result = await pool.query(query, value);
 
     res.status(200).json({
       message: "Notifications fetched successfully",
@@ -27,7 +27,7 @@ const updateNotificationRead = async (req, res) => {
     const query =
       "UPDATE notifications SET is_read = true WHERE is_read = false AND user_id = $1 RETURNING *";
 
-    const result = await db.query(query, [id]);
+    const result = await pool.query(query, [id]);
     res.status(200).json({
       message: "Notifications updated successfully",
       notifications: result.rows,

@@ -1,4 +1,4 @@
-const db = require("../config/supabase");
+const { pool } = require("../config/supabase");
 
 const createNotification = async ({ user_id, heading, message, is_read }) => {
   try {
@@ -8,7 +8,7 @@ const createNotification = async ({ user_id, heading, message, is_read }) => {
     `;
     const values = [user_id, heading, message, is_read];
 
-    await db.query(query, values);
+    await pool.query(query, values);
   } catch (error) {
     console.error("Error creating notification:", error);
   }

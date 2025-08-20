@@ -1,9 +1,18 @@
-const db = require("../config/supabase");
+const { pool, client } = require("../config/supabase");
 const { createNotification } = require("../services/notification.service");
 
 const createApplication = async (req, res) => {
-  const { job_title, company, status, date_applied, interview_date } = req.body;
+  const {
+    job_title,
+    company,
+    status,
+    date_applied,
+    interview_date,
+    description,
+  } = req.body;
+
   const user_id = req.user.id;
+  const file = req.file;
 
   if (
     !job_title ||
@@ -16,9 +25,33 @@ const createApplication = async (req, res) => {
   }
 
   try {
+    let imageUrl = null;
+
+    if (file) {
+      // Upload file to Supabase storage
+      const { data, error } = await client.storage
+        .from("applications") // bucket name
+        .upload(`${user_id}/${Date.now()}-${file.originalname}`, file.buffer, {
+          contentType: file.mimetype,
+          upsert: true,
+        });
+
+      if (error) {
+        console.error("Error uploading image:", error);
+        return res.status(500).json({ error: "Image upload failed" });
+      }
+
+      // Get public URL
+      const { data: publicUrlData } = client.storage
+        .from("applications")
+        .getPublicUrl(data.path);
+
+      imageUrl = publicUrlData.publicUrl;
+    }
+
     const query = `
-      INSERT INTO applications (user_id, job_title, company, status, date_applied, interview_date)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO applications (user_id, job_title, company, status, date_applied, interview_date, image_url, description)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
     `;
     const values = [
@@ -27,10 +60,12 @@ const createApplication = async (req, res) => {
       company,
       status,
       date_applied,
-      interview_date,
+      interview_date || null,
+      imageUrl,
+      description || null,
     ];
 
-    const result = await db.query(query, values);
+    const result = await pool.query(query, values);
 
     await createNotification({
       user_id: user_id,
@@ -55,7 +90,7 @@ const fetchApplications = async (req, res) => {
     const query = `SELECT * FROM applications WHERE user_id = $1 ORDER BY date_applied DESC`;
     const value = id;
 
-    const result = await db.query(query, [value]);
+    const result = await pool.query(query, [value]);
     res.status(200).json({
       applications: result.rows,
     });
@@ -74,7 +109,7 @@ const updateApplication = async (req, res) => {
   const values = [id];
 
   try {
-    const existing = await db.query(
+    const existing = await pool.query(
       "SELECT * FROM applications WHERE id = $1",
       [id]
     );
@@ -90,7 +125,7 @@ const updateApplication = async (req, res) => {
       values.unshift(interview_date);
     }
 
-    await db.query(query, values);
+    await pool.query(query, values);
 
     if (interview_date) {
       await createNotification({
@@ -131,7 +166,7 @@ const deleteApplications = async (req, res) => {
   try {
     const query = "DELETE from applications WHERE id = ANY($1)";
 
-    await db.query(query, [ids]);
+    await pool.query(query, [ids]);
 
     await createNotification({
       user_id: user_id,

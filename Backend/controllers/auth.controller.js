@@ -1,4 +1,4 @@
-const db = require("../config/supabase");
+const { pool } = require("../config/supabase");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -23,13 +23,13 @@ const googleLogin = async (req, res) => {
     const payload = ticket.getPayload();
     const { email, given_name, family_name } = payload;
 
-    let result = await db.query("SELECT * FROM users WHERE email = $1", [
+    let result = await pool.query("SELECT * FROM users WHERE email = $1", [
       email,
     ]);
 
     let user;
     if (result.rows.length === 0) {
-      const insertResult = await db.query(
+      const insertResult = await pool.query(
         `INSERT INTO users (first_name, last_name, email, password) 
          VALUES ($1, $2, $3, $4) RETURNING *`,
         [given_name, family_name, email, null]
@@ -53,7 +53,7 @@ const googleLogin = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const result = await db.query("SELECT * FROM users WHERE email = $1", [
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
       email,
     ]);
     if (result.rows.length === 0) {
@@ -80,7 +80,7 @@ const login = async (req, res) => {
 const register = async (req, res) => {
   const { firstName, lastName, contactNo, email, password } = req.body;
   try {
-    const emailAvailable = await db.query(
+    const emailAvailable = await pool.query(
       "SELECT * FROM users WHERE email = $1",
       [email]
     );
@@ -91,7 +91,7 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const result = await db.query(
+    const result = await pool.query(
       "INSERT INTO users (first_name, last_name, contact_no, email, password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
       [firstName, lastName, contactNo, email, hashedPassword]
     );
@@ -122,9 +122,10 @@ const requestResetPassword = async (req, res) => {
   });
 
   try {
-    const emailExist = await db.query("SELECT id FROM users WHERE email = $1", [
-      email,
-    ]);
+    const emailExist = await pool.query(
+      "SELECT id FROM users WHERE email = $1",
+      [email]
+    );
 
     if (!emailExist) {
       return res.status(401).json({ error: "Email do not exist" });
@@ -135,7 +136,7 @@ const requestResetPassword = async (req, res) => {
     const token = await crypto.randomBytes(32).toString("hex");
     const expires = Date.now() + 15 * 60 * 1000;
 
-    await db.query(
+    await pool.query(
       "INSERT INTO reset_token (user_id, email, token, expires, used) VALUES ($1, $2, $3, $4, $5)",
       [data.id, email, token, expires, used]
     );
@@ -164,7 +165,7 @@ const resetPassword = async (req, res) => {
     }
 
     // Check if token exists
-    const tokenQuery = await db.query(
+    const tokenQuery = await pool.query(
       `SELECT user_id, expires FROM reset_token WHERE token = $1`,
       [token]
     );
@@ -181,12 +182,12 @@ const resetPassword = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await db.query(`UPDATE users SET password = $1 WHERE id = $2`, [
+    await pool.query(`UPDATE users SET password = $1 WHERE id = $2`, [
       hashedPassword,
       resetRequest.user_id,
     ]);
 
-    await db.query(`DELETE FROM reset_token WHERE token = $1`, [token]);
+    await pool.query(`DELETE FROM reset_token WHERE token = $1`, [token]);
 
     res.json({ message: "Password reset successful" });
   } catch (error) {

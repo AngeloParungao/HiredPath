@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router();
+const multer = require("multer");
 const {
   createApplication,
   fetchApplications,
@@ -8,7 +8,15 @@ const {
 } = require("../controllers/application.controller");
 const authenticateToken = require("../middleware/authMiddleware");
 
-router.post("/create", authenticateToken, createApplication);
+const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
+
+router.post(
+  "/create",
+  upload.single("file"),
+  authenticateToken,
+  createApplication
+);
 router.get("/fetch/:id", authenticateToken, fetchApplications);
 router.put("/:id", authenticateToken, updateApplication);
 router.delete("/", authenticateToken, deleteApplications);

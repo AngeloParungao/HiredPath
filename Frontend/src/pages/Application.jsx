@@ -125,6 +125,8 @@ const Application = () => {
     [statusColors, statusOptions, updateApplication]
   );
 
+  console.log(filteredApplications);
+
   return (
     <Box
       minHeight="100vh"
