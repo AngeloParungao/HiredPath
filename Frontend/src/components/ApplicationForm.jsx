@@ -21,18 +21,22 @@ import dayjs from "dayjs";
 import { statusOptions, statusColors } from "../constant/seed";
 import useApplicationStore from "../store/applicationStore";
 
-const ApplicationForm = ({ isOpen, onClose }) => {
+const ApplicationForm = ({ isOpen, onClose, rowDetails }) => {
   const { loading, error, createApplication } = useApplicationStore();
-  const [descriptionType, setDescriptionType] = useState("Text");
+  const [descriptionType, setDescriptionType] = useState(
+    rowDetails?.description ? "Text" : rowDetails?.image_url ? "Image" : "Text"
+  );
   const [file, setFile] = useState();
   const [description, setDescription] = useState("");
   const [formErrors, setFormErrors] = useState({});
   const [form, setForm] = useState({
-    job_title: "",
-    company: "",
-    status: "",
-    date_applied: dayjs(),
-    interview_date: null,
+    job_title: rowDetails?.job_title ?? "",
+    company: rowDetails?.company ?? "",
+    status: rowDetails?.status ?? "",
+    description: rowDetails?.description ?? "",
+    image_url: rowDetails?.image_url ?? "",
+    date_applied: dayjs(rowDetails?.date_applied) ?? dayjs(),
+    interview_date: dayjs(rowDetails?.interview_date) ?? null,
   });
 
   const handleSubmit = async () => {
@@ -79,7 +83,9 @@ const ApplicationForm = ({ isOpen, onClose }) => {
 
   return (
     <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Add New Application</DialogTitle>
+      <DialogTitle>
+        {rowDetails ? "Application Details" : "Add New Application"}
+      </DialogTitle>
       <DialogContent
         sx={{
           display: "flex",
@@ -169,32 +175,49 @@ const ApplicationForm = ({ isOpen, onClose }) => {
           ) : (
             <Box>
               <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  padding: 4,
-                  border: "1px dashed #828282ff",
-                  borderRadius: 1,
-                }}
+                position="relative"
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                border="1px dashed #828282ff"
+                borderRadius={1}
+                padding={4}
+                gap={2}
               >
-                <Button
-                  variant="text"
-                  component="label"
-                  sx={{ color: "gray.400" }}
-                >
-                  Upload File
-                  <input
-                    hidden
-                    accept="image/*"
-                    type="file"
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        setFile(e.target.files[0]); // store actual file object
-                      }
+                {(file || form.image_url) && (
+                  <img
+                    src={file ? URL.createObjectURL(file) : form.image_url}
+                    alt="Preview"
+                    style={{
+                      maxWidth: "100%",
+                      objectFit: "contain",
                     }}
                   />
-                </Button>
+                )}
+                {!rowDetails && (
+                  <Button
+                    variant="contained"
+                    component="label"
+                    sx={{
+                      position: "absolute",
+                      backgroundColor: "gray.700",
+                      boxShadow: "none",
+                    }}
+                  >
+                    Upload File
+                    <input
+                      hidden
+                      accept="image/*"
+                      type="file"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setFile(e.target.files[0]); // store actual file object
+                        }
+                      }}
+                    />
+                  </Button>
+                )}
                 {file && (
                   <Typography variant="body2" gutterBottom>
                     {file.name}
@@ -272,14 +295,16 @@ const ApplicationForm = ({ isOpen, onClose }) => {
         )}
       </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose} color="inherit">
-          Cancel
-        </Button>
-        <Button variant="contained" onClick={handleSubmit}>
-          {loading ? "Submitting..." : "Submit"}
-        </Button>
-      </DialogActions>
+      {!rowDetails && (
+        <DialogActions>
+          <Button onClick={onClose} color="inherit">
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={handleSubmit}>
+            {loading ? "Submitting..." : "Submit"}
+          </Button>
+        </DialogActions>
+      )}
     </Dialog>
   );
 };

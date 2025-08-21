@@ -35,6 +35,7 @@ const Application = () => {
   } = useApplicationStore();
   const { online } = useGlobalStore();
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [rowDetails, setRowDetails] = useState();
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -121,11 +122,32 @@ const Application = () => {
             </div>
           ),
       },
+      {
+        field: "Action",
+        headerName: "Action",
+        renderCell: (params) => (
+          <div onClick={(e) => e.stopPropagation()}>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{
+                backgroundColor: "gray.600",
+                color: "gray.300",
+                boxShadow: "none",
+              }}
+              onClick={() => {
+                console.log(params.row);
+                setRowDetails(params.row);
+              }}
+            >
+              Details
+            </Button>
+          </div>
+        ),
+      },
     ],
     [statusColors, statusOptions, updateApplication]
   );
-
-  console.log(filteredApplications);
 
   return (
     <Box
@@ -138,6 +160,7 @@ const Application = () => {
     >
       <TopBar header="Job Applications" />
       <Box display="flex" justifyContent="space-between" alignItems="center">
+        {/* SEARCH BAR AND FILTER */}
         <Box display="flex" gap={2}>
           {!online ? (
             <Skeleton
@@ -211,6 +234,8 @@ const Application = () => {
             </Select>
           )}
         </Box>
+
+        {/* BUTTONS */}
         <Box display="flex" gap={2}>
           {!online ? (
             <Skeleton
@@ -237,21 +262,25 @@ const Application = () => {
               Add Application
             </Button>
           )}
-          {!online ? (
-            <Skeleton
-              variant="rectangular"
-              height={40}
-              width={40}
-              animation="wave"
-              sx={{ borderRadius: 2 }}
-            />
-          ) : (
-            <IconButton onClick={() => deleteApplications(selectedRows)}>
-              <DeleteIcon />
-            </IconButton>
-          )}
+          {selectedRows.length !== 0 ? (
+            !online ? (
+              <Skeleton
+                variant="rectangular"
+                height={40}
+                width={40}
+                animation="wave"
+                sx={{ borderRadius: 2 }}
+              />
+            ) : (
+              <IconButton onClick={() => deleteApplications(selectedRows)}>
+                <DeleteIcon />
+              </IconButton>
+            )
+          ) : null}
         </Box>
       </Box>
+
+      {/* TABLE */}
       {!online || loading ? (
         <Box
           height="calc(100vh - 150px)"
@@ -344,10 +373,15 @@ const Application = () => {
         </Box>
       )}
 
-      {isFormModalOpen && (
+      {/* FORM MODAL */}
+      {(isFormModalOpen || rowDetails) && (
         <ApplicationForm
-          isOpen={isFormModalOpen}
-          onClose={() => setIsFormModalOpen(false)}
+          isOpen={isFormModalOpen || rowDetails}
+          onClose={() => {
+            setIsFormModalOpen(false);
+            setRowDetails("");
+          }}
+          rowDetails={rowDetails}
         />
       )}
     </Box>

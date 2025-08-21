@@ -24,6 +24,10 @@ const useApplicationStore = create((set, get) => ({
       );
       set((state) => ({
         applications: [...state.applications, res.data.application],
+        filteredApplications: [
+          ...state.filteredApplications,
+          res.data.application,
+        ],
         loading: false,
       }));
     } catch (err) {
