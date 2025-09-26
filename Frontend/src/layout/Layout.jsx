@@ -2,7 +2,13 @@ import { Outlet } from "react-router-dom";
 import { getTheme } from "../theme";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { Box, CssBaseline, ThemeProvider } from "@mui/material";
+import {
+  Box,
+  CssBaseline,
+  ThemeProvider,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import Sidebar from "../components/Sidebar";
 import InternetChecker from "../components/InternetChecker";
 import useGlobalStore from "../store/globalStore";
@@ -18,6 +24,8 @@ const Layout = () => {
   const { fetchNotifications } = useNotificationStore();
   const mode = getTheme(theme);
 
+  const isSmallScreen = useMediaQuery("(max-width: 950px)");
+
   useEffect(() => {
     fetchApplications(user?.id);
   }, []);
@@ -25,6 +33,27 @@ const Layout = () => {
   useEffect(() => {
     fetchNotifications(user?.id);
   }, [applications]);
+
+  if (isSmallScreen) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          bgcolor: "black",
+          color: "white",
+          textAlign: "center",
+          px: 2,
+        }}
+      >
+        <Typography variant="h5">
+          This application is available on desktop or large screens only.
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <ThemeProvider theme={mode}>
