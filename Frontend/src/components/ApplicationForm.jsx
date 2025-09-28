@@ -121,6 +121,7 @@ const ApplicationForm = ({ isOpen, onClose, rowDetails }) => {
           }}
           error={formErrors.job_title}
           helperText={formErrors.job_title ? "Job title is required" : ""}
+          disabled={rowDetails ? true : false}
         />
 
         <TextField
@@ -135,6 +136,7 @@ const ApplicationForm = ({ isOpen, onClose, rowDetails }) => {
           }}
           error={formErrors.company}
           helperText={formErrors.company ? "Company is required" : ""}
+          disabled={rowDetails ? true : false}
         />
 
         <Box display="flex" flexDirection="column" gap={2}>
@@ -171,6 +173,7 @@ const ApplicationForm = ({ isOpen, onClose, rowDetails }) => {
               onChange={(e) => {
                 setDescription(e.target.value);
               }}
+              disabled={rowDetails ? true : false}
             />
           ) : (
             <Box>
@@ -184,6 +187,7 @@ const ApplicationForm = ({ isOpen, onClose, rowDetails }) => {
                 borderRadius={1}
                 padding={4}
                 gap={2}
+                disabled={rowDetails ? true : false}
               >
                 {(file || form.image_url) && (
                   <img
@@ -237,6 +241,7 @@ const ApplicationForm = ({ isOpen, onClose, rowDetails }) => {
               setFormErrors({ ...formErrors, status: "" });
               setForm({ ...form, status: e.target.value });
             }}
+            disabled={rowDetails ? true : false}
           >
             {statusOptions.map((status) => (
               <MenuItem key={status} value={status}>
@@ -263,6 +268,7 @@ const ApplicationForm = ({ isOpen, onClose, rowDetails }) => {
               interview_date: form.status === "Interview" ? dayjs() : null,
             });
           }}
+          disabled={rowDetails ? true : false}
           slotProps={{
             textField: {
               fullWidth: true,
@@ -280,6 +286,7 @@ const ApplicationForm = ({ isOpen, onClose, rowDetails }) => {
               setFormErrors({ ...formErrors, interview_date: "" });
               setForm({ ...form, interview_date: newValue });
             }}
+            disabled={rowDetails ? true : false}
             slotProps={{
               textField: {
                 fullWidth: true,
